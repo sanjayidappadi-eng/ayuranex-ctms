@@ -385,6 +385,6 @@ function autoDispatchPlugin(): Plugin {
 }
 
 export default defineConfig({
-  base: './',
+  base: '/',
   plugins: [react(), tailwindcss(), autoDispatchPlugin()],
 })
