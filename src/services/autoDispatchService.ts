@@ -314,7 +314,7 @@ export async function executeAutonomousRegulatoryDispatch(params: {
         ? {
             host: config.smtpHost || "smtp.gmail.com",
             port: config.smtpPort || 465,
-            user: config.smtpUser || config.dcgiEmail || "sanjayidappadi@gmail.com",
+            user: (config.smtpUser || "").trim(),
             pass: config.smtpPass
           }
         : undefined

@@ -45,13 +45,13 @@ export const DEFAULT_NOTIFICATION_CONFIG: NotificationChannelConfig = {
   npvccMobile: "+91-9871-330412",
   piEmail: "pi.nesari@aiia.gov.in",
   piMobile: "+91-9422-771802",
-  userMobile: "+91-7094258926",
-  userEmail: "sanjayidappadi@gmail.com",
+  userMobile: "",
+  userEmail: "",
   smsProvider: "fast2sms",
   fast2SmsApiKey: "",
   smtpHost: "smtp.gmail.com",
   smtpPort: "465",
-  smtpUser: "sanjayidappadi@gmail.com",
+  smtpUser: "",
   smtpPass: "",
   lastUpdated: new Date().toISOString(),
   updatedBy: "Admin (Executive Director)"
@@ -102,14 +102,13 @@ export function getNotificationConfigSync(): NotificationChannelConfig {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed && (parsed.dcgiEmail || parsed.smtpUser)) {
+      if (parsed) {
         return {
+          ...DEFAULT_NOTIFICATION_CONFIG,
           ...parsed,
-          userMobile: parsed.userMobile || "+91-7094258926",
-          userEmail: parsed.userEmail || "sanjayidappadi@gmail.com",
-          smtpHost: "smtp.gmail.com",
+          smtpHost: parsed.smtpHost || "smtp.gmail.com",
           smtpPort: parsed.smtpPort || "465",
-          smtpUser: parsed.smtpUser || "sanjayidappadi@gmail.com",
+          smtpUser: parsed.smtpUser || "",
           smsProvider: "fast2sms",
           isLocked: parsed.isLocked ?? (localStorage.getItem("ayuranex_credentials_locked") === "true")
         };
@@ -118,11 +117,6 @@ export function getNotificationConfigSync(): NotificationChannelConfig {
   } catch {}
   return {
     ...DEFAULT_NOTIFICATION_CONFIG,
-    userMobile: "+91-7094258926",
-    userEmail: "sanjayidappadi@gmail.com",
-    smtpHost: "smtp.gmail.com",
-    smtpPort: "465",
-    smtpUser: "sanjayidappadi@gmail.com",
     smsProvider: "fast2sms"
   };
 }
@@ -149,13 +143,13 @@ export async function getNotificationConfig(): Promise<NotificationChannelConfig
         npvccMobile: data.npvcc_mobile,
         piEmail: data.pi_email,
         piMobile: data.pi_mobile,
-        userMobile: "+91-7094258926",
-        userEmail: "sanjayidappadi@gmail.com",
+        userMobile: data.user_mobile || "",
+        userEmail: data.user_email || "",
         smsProvider: "fast2sms",
         fast2SmsApiKey: data.fast2sms_api_key || "",
         smtpHost: data.smtp_host || "smtp.gmail.com",
         smtpPort: data.smtp_port || "465",
-        smtpUser: data.smtp_user || "sanjayidappadi@gmail.com",
+        smtpUser: data.smtp_user || "",
         smtpPass: data.smtp_pass || "",
         lastUpdated: data.last_updated,
         updatedBy: data.updated_by
