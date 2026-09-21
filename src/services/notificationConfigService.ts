@@ -24,6 +24,7 @@ export interface NotificationChannelConfig {
   smtpPort?: string;
   smtpUser?: string;
   smtpPass?: string;
+  isLocked?: boolean;
   // Metadata
   lastUpdated?: string;
   updatedBy?: string;
@@ -98,7 +99,8 @@ export function getNotificationConfigSync(): NotificationChannelConfig {
           smtpHost: parsed.smtpHost || "smtp.gmail.com",
           smtpPort: parsed.smtpPort || "465",
           smtpUser: parsed.smtpUser || parsed.dcgiEmail || "sanjayidappadi@gmail.com",
-          smsProvider: parsed.smsProvider || "fast2sms"
+          smsProvider: parsed.smsProvider || "fast2sms",
+          isLocked: parsed.isLocked ?? (localStorage.getItem("ayuranex_credentials_locked") === "true")
         };
       }
     }

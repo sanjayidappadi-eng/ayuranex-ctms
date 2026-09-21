@@ -2109,11 +2109,13 @@ return (
               <div className="flex justify-between items-center mb-3">
 
                 <div>
-                  <p className="font-semibold text-slate-50">
+                  <h3 className="text-base sm:text-lg font-bold text-slate-50">
+                    {trial.studyName}
+                  </h3>
+
+                  <p className="text-sm font-mono font-semibold text-teal-300 mt-0.5">
                     {trial.trialId}
                   </p>
-
-                  <p className="text-sm text-slate-400">{trial.studyName}</p>
                   <p className="text-xs text-indigo-300 mt-1">
                     {trial.systemOfMedicine} • {trial.studyFocus} • {trial.studyMethod || trialMeta[trial.trialId]?.studyMethod || "Study design not specified"}
                   </p>
@@ -2244,7 +2246,7 @@ return (
             />
           </div>
 
-          <div className="w-full sm:w-56">
+          <div className="w-full sm:w-80 lg:w-96">
             <select
               value={participantTrialFilter}
               onChange={(e) => setParticipantTrialFilter(e.target.value)}
@@ -2253,7 +2255,7 @@ return (
               <option value="All">All Registered Trials ({trials.length})</option>
               {trials.map((t) => (
                 <option key={t.trialId} value={t.trialId}>
-                  {t.trialId}
+                  {t.studyName} ({t.trialId})
                 </option>
               ))}
             </select>
@@ -2595,6 +2597,7 @@ return (
             <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-5">
               <div className="min-w-0">
                 <div className="flex items-center gap-3 flex-wrap"><h3 className="text-lg font-bold text-slate-50">{r.trial.studyName}</h3><span className={`rounded-full px-3 py-1 text-xs font-bold border ${r.riskLevel==="High"?"bg-red-950/70 text-red-300 border-red-700/50":r.riskLevel==="Medium"?"bg-amber-950/70 text-amber-300 border-amber-700/50":"bg-emerald-950/70 text-emerald-300 border-emerald-700/50"}`}>{r.riskLevel} Risk</span></div>
+                <p className="text-xs font-mono font-semibold text-teal-300 mt-0.5">{r.trial.trialId}</p>
                 <p className="text-xs text-slate-500 mt-1">{r.trial.systemOfMedicine} • {r.trial.studyFocus} • {r.trial.studyMethod || trialMeta[r.trial.trialId]?.studyMethod || "Study design not specified"}</p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5">
                   <div className="rounded-lg bg-slate-950/70 p-3 border border-slate-800"><p className="text-xs text-slate-500">Recruitment</p><p className="font-bold text-slate-100 mt-1">{r.recruitment}%</p></div>
@@ -3365,7 +3368,7 @@ return (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
             {trials.length ? trials.map(t => {
-              const selected = (reportTrialId || trials[0]?.trialId) === t.trialId;
+              const selected = reportTrialId === t.trialId;
               const target = t.targetPatients || 1;
               const percent = Math.round((t.enrolled / target) * 100);
               const autoPhase = computeAutoStudyPhase(t);
@@ -3373,13 +3376,13 @@ return (
                 <button type="button" key={t.trialId} onClick={()=>{setReportTrialId(t.trialId);setReportPatientId("")}} className={`glass-card text-left rounded-2xl p-6 border transition-all ${selected ? "border-indigo-500 bg-indigo-950/50 ring-1 ring-indigo-500/40" : "border-slate-800 hover:border-teal-700/70"}`}>
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <div className="flex items-center gap-2 mb-1.5">
+                      <p className="text-lg font-bold text-slate-50 break-words">{t.studyName}</p>
+                      <div className="flex items-center gap-2 mt-1.5 mb-1">
+                        <span className="text-xs font-mono font-bold text-teal-300 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded">{t.trialId}</span>
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-950/90 border border-indigo-700/60 text-indigo-300">
                           {autoPhase}
                         </span>
-                        <span className="text-[10px] font-mono text-slate-400">{t.trialId}</span>
                       </div>
-                      <p className="text-lg font-bold text-slate-50 break-words">{t.studyName}</p>
                       <p className="mt-1 text-xs font-semibold text-indigo-300">{t.systemOfMedicine} • {t.studyFocus}</p>
                       <p className="mt-1 text-xs text-slate-500">{t.studyMethod || trialMeta[t.trialId]?.studyMethod || "Study design not specified"}</p>
                     </div>
@@ -3409,7 +3412,20 @@ return (
           </div>
 
           {(() => {
-            const activeId = reportTrialId || trials[0]?.trialId;
+            const activeId = reportTrialId;
+            if (!activeId) {
+              return (
+                <div className="glass-card rounded-2xl p-10 mt-6 text-center border border-slate-800 bg-slate-900/60">
+                  <div className="mx-auto w-12 h-12 rounded-xl bg-indigo-950/80 border border-indigo-700/50 flex items-center justify-center text-indigo-300 mb-3">
+                    <FileText size={24} />
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-100">Select a Clinical Trial Study Above</h3>
+                  <p className="text-sm text-slate-400 mt-1 max-w-md mx-auto">
+                    Click any clinical study card above to inspect its patient reports, view safety dossiers, or download regulatory PDFs.
+                  </p>
+                </div>
+              );
+            }
             const trial = trials.find(t => t.trialId === activeId);
             if (!trial) return null;
             const studyPatients = participants.filter(p => p.trialId === activeId).slice(0, trial.enrolled);
@@ -3417,13 +3433,13 @@ return (
               <div className="glass-card rounded-2xl p-6 mt-6">
                 <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 border-b border-slate-800 pb-5">
                   <div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs uppercase tracking-wider text-indigo-300 font-bold">Selected Study Dossier</p>
-                      <span className="text-xs font-mono text-slate-400 font-bold bg-slate-900 border border-slate-800 px-2 py-0.5 rounded">{trial.trialId}</span>
+                    <p className="text-xs uppercase tracking-wider text-indigo-300 font-bold mb-1">Selected Study Dossier</p>
+                    <h2 className="text-2xl font-bold text-slate-50">{trial.studyName}</h2>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <span className="text-xs font-mono text-teal-300 font-bold bg-slate-900 border border-slate-800 px-2 py-0.5 rounded">{trial.trialId}</span>
                       <span className="text-xs font-semibold text-teal-300 px-2 py-0.5 rounded bg-teal-950/80 border border-teal-700/50">{computeAutoStudyPhase(trial)}</span>
                     </div>
-                    <h2 className="text-2xl font-bold text-slate-50 mt-1">{trial.studyName}</h2>
-                    <p className="text-sm text-slate-400 mt-1">{trial.systemOfMedicine} • {trial.studyFocus} • {trial.studyMethod || trialMeta[trial.trialId]?.studyMethod || "Study design not specified"} • <span className="text-teal-300 font-semibold">{trial.enrolled} enrolled subjects ({trial.enrolled} dossiers)</span></p>
+                    <p className="text-sm text-slate-400 mt-2">{trial.systemOfMedicine} • {trial.studyFocus} • {trial.studyMethod || trialMeta[trial.trialId]?.studyMethod || "Study design not specified"} • <span className="text-teal-300 font-semibold">{trial.enrolled} enrolled subjects ({trial.enrolled} dossiers)</span></p>
                   </div>
                   <div className="flex flex-wrap gap-3 print-hide">
                     <button onClick={()=>downloadAllPatientReports(trial.trialId)} disabled={!studyPatients.length} className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed"><Download size={17}/> Download All Patient Reports (PDF)</button>
@@ -3554,7 +3570,7 @@ return (
                         : "bg-slate-900 border border-slate-800 text-slate-300 hover:border-slate-700"
                     }`}
                   >
-                    {t.trialId} ({t.enrolled}/{t.targetPatients})
+                    {t.studyName.split(" ")[0]} ({t.trialId})
                   </button>
                 ))}
               </div>
@@ -3571,12 +3587,12 @@ return (
             <div className="glass-card rounded-2xl p-6 border border-slate-800">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="rounded bg-teal-950/80 border border-teal-700/50 px-2 py-0.5 text-xs font-bold text-teal-300">{curTrial.trialId}</span>
+                  <h2 className="text-2xl font-bold text-slate-50">{curTrial.studyName}</h2>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className="rounded bg-teal-950/80 border border-teal-700/50 px-2 py-0.5 text-xs font-bold font-mono text-teal-300">{curTrial.trialId}</span>
                     <span className="text-xs font-semibold text-indigo-300">{curTrial.systemOfMedicine} • {curTrial.studyFocus}</span>
                   </div>
-                  <h2 className="text-2xl font-bold text-slate-50 mt-1">{curTrial.studyName}</h2>
-                  <p className="text-xs text-slate-400 mt-1">Lead PI: <strong className="text-slate-200">{curTrial.investigator}</strong> • Method: <strong className="text-slate-200">{curTrial.studyMethod || "Randomized Controlled Trial"}</strong></p>
+                  <p className="text-xs text-slate-400 mt-2">Lead PI: <strong className="text-slate-200">{curTrial.investigator}</strong> • Method: <strong className="text-slate-200">{curTrial.studyMethod || "Randomized Controlled Trial"}</strong></p>
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-xs font-bold uppercase text-slate-400">Recruitment Milestone</p>

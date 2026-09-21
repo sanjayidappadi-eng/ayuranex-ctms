@@ -61,33 +61,36 @@ export default function PharmacovigilanceNPvCC({ userRole: _userRole }: Props) {
     outcome: "Recovering"
   });
 
-  // Live countdown calculation for 24-hour regulatory reporting clock
-  const [timeRemaining24h, setTimeRemaining24h] = useState<{ hours: number; minutes: number; seconds: number; isExpired: boolean }>({
-    hours: 15,
-    minutes: 42,
-    seconds: 18,
-    isExpired: false
-  });
+  // Live countdown calculation for 24-hour regulatory reporting clock (repeats every day at 5:00 PM IST)
+  const computeNext5PmDeadline = () => {
+    const now = new Date();
+    const target = new Date(now);
+    target.setHours(17, 0, 0, 0);
+    if (now.getTime() >= target.getTime()) {
+      target.setDate(target.getDate() + 1);
+    }
+    return target;
+  };
+
+  const getCountdownStats = () => {
+    const now = new Date().getTime();
+    const targetTime = computeNext5PmDeadline().getTime();
+    const diff = Math.max(0, targetTime - now);
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    return { hours, minutes, seconds, isExpired: false };
+  };
+
+  const [timeRemaining24h, setTimeRemaining24h] = useState(getCountdownStats);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      if (!selectedEvent || !selectedEvent.isSerious) return;
-      const targetTime = new Date(selectedEvent.notificationDue24h).getTime();
-      const now = new Date().getTime();
-      const diff = targetTime - now;
-
-      if (diff <= 0) {
-        setTimeRemaining24h({ hours: 0, minutes: 0, seconds: 0, isExpired: true });
-      } else {
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        setTimeRemaining24h({ hours, minutes, seconds, isExpired: false });
-      }
+      setTimeRemaining24h(getCountdownStats());
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [selectedEvent]);
+  }, []);
 
   // Naranjo Causality Assessment State
   const [naranjoAnswers, setNaranjoAnswers] = useState<Record<number, number>>({
@@ -314,7 +317,7 @@ export default function PharmacovigilanceNPvCC({ userRole: _userRole }: Props) {
                   <span>:</span>
                   <span>{String(timeRemaining24h.seconds).padStart(2, "0")}s</span>
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1">Due: {new Date(selectedEvent.notificationDue24h).toLocaleTimeString()} IST</p>
+                <p className="text-[11px] text-slate-400 mt-1 font-medium">Due: 5:00:00 PM IST (Repeats 24h Daily Regulatory Cycle)</p>
               </div>
 
               <div className="border-t sm:border-t-0 sm:border-l border-slate-800 pt-3 sm:pt-0 sm:pl-4 flex flex-col gap-2">
