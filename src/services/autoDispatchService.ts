@@ -303,10 +303,8 @@ export async function executeAutonomousRegulatoryDispatch(params: {
     dispatchAutoSms({
       to: toMobile,
       message: smsText,
-      provider: config.smsProvider || "fast2sms",
-      apiKey: config.smsProvider === "twilio" ? config.twilioAuthToken : config.fast2SmsApiKey,
-      accountSid: config.twilioAccountSid,
-      fromNumber: config.twilioFromNumber
+      provider: "fast2sms",
+      apiKey: config.fast2SmsApiKey
     }),
     dispatchAutoEmail({
       to: toEmail,

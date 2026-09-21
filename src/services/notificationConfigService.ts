@@ -14,6 +14,9 @@ export interface NotificationChannelConfig {
   // Lead Principal Investigator & Site Desk
   piEmail: string;
   piMobile: string;
+  // Personal Handset Target
+  userMobile?: string;
+  userEmail?: string;
   // Automated Background Software Gateway Settings
   smsProvider?: "fast2sms" | "twilio" | "autonomous";
   fast2SmsApiKey?: string;
@@ -42,8 +45,14 @@ export const DEFAULT_NOTIFICATION_CONFIG: NotificationChannelConfig = {
   npvccMobile: "+91-9871-330412",
   piEmail: "pi.nesari@aiia.gov.in",
   piMobile: "+91-9422-771802",
+  userMobile: "+91-7094258926",
+  userEmail: "sanjayidappadi@gmail.com",
   smsProvider: "fast2sms",
   fast2SmsApiKey: "",
+  smtpHost: "smtp.gmail.com",
+  smtpPort: "465",
+  smtpUser: "sanjayidappadi@gmail.com",
+  smtpPass: "",
   lastUpdated: new Date().toISOString(),
   updatedBy: "Admin (Executive Director)"
 };
@@ -93,13 +102,15 @@ export function getNotificationConfigSync(): NotificationChannelConfig {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed && parsed.dcgiEmail) {
+      if (parsed && (parsed.dcgiEmail || parsed.smtpUser)) {
         return {
           ...parsed,
-          smtpHost: parsed.smtpHost || "smtp.gmail.com",
+          userMobile: parsed.userMobile || "+91-7094258926",
+          userEmail: parsed.userEmail || "sanjayidappadi@gmail.com",
+          smtpHost: "smtp.gmail.com",
           smtpPort: parsed.smtpPort || "465",
-          smtpUser: parsed.smtpUser || parsed.dcgiEmail || "sanjayidappadi@gmail.com",
-          smsProvider: parsed.smsProvider || "fast2sms",
+          smtpUser: parsed.smtpUser || "sanjayidappadi@gmail.com",
+          smsProvider: "fast2sms",
           isLocked: parsed.isLocked ?? (localStorage.getItem("ayuranex_credentials_locked") === "true")
         };
       }
@@ -107,6 +118,8 @@ export function getNotificationConfigSync(): NotificationChannelConfig {
   } catch {}
   return {
     ...DEFAULT_NOTIFICATION_CONFIG,
+    userMobile: "+91-7094258926",
+    userEmail: "sanjayidappadi@gmail.com",
     smtpHost: "smtp.gmail.com",
     smtpPort: "465",
     smtpUser: "sanjayidappadi@gmail.com",
@@ -136,14 +149,13 @@ export async function getNotificationConfig(): Promise<NotificationChannelConfig
         npvccMobile: data.npvcc_mobile,
         piEmail: data.pi_email,
         piMobile: data.pi_mobile,
-        smsProvider: data.sms_provider || "fast2sms",
+        userMobile: "+91-7094258926",
+        userEmail: "sanjayidappadi@gmail.com",
+        smsProvider: "fast2sms",
         fast2SmsApiKey: data.fast2sms_api_key || "",
-        twilioAccountSid: data.twilio_account_sid || "",
-        twilioAuthToken: data.twilio_auth_token || "",
-        twilioFromNumber: data.twilio_from_number || "",
-        smtpHost: data.smtp_host || "",
-        smtpPort: data.smtp_port || "",
-        smtpUser: data.smtp_user || "",
+        smtpHost: data.smtp_host || "smtp.gmail.com",
+        smtpPort: data.smtp_port || "465",
+        smtpUser: data.smtp_user || "sanjayidappadi@gmail.com",
         smtpPass: data.smtp_pass || "",
         lastUpdated: data.last_updated,
         updatedBy: data.updated_by
@@ -195,6 +207,7 @@ export async function saveNotificationConfig(
 
   const updatedRecord: NotificationChannelConfig = {
     ...newConfig,
+    smsProvider: "fast2sms",
     id: "default_config",
     lastUpdated: new Date().toISOString(),
     updatedBy: "Admin (Executive Director)"
